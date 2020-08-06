@@ -7,22 +7,7 @@ fn main() {
     let mut output = String::with_capacity(8192);
     let mut count = 0;
 
-    output.push_str(
-        r"global _start
-extern getchar
-extern putchar
-extern exit
-section .text
-_start:
-sub rsp, 4000
-mov eax, 0
-mov ecx, 4000
-mov rdi, rsp
-rep stosb
-mov r12, rsp
-sub rsp, 64
-",
-    );
+    output.push_str(PRELUDE);
 
     for c in source.chars() {
         match c {
@@ -49,7 +34,7 @@ sub rsp, 64
             }
 
             ']' => output.push_str(&format!(
-                " jmp label{0}start\nlabel{0}end:\n",
+                "jmp label{0}start\nlabel{0}end:\n",
                 cola.pop_front().unwrap()
             )),
 
@@ -57,34 +42,46 @@ sub rsp, 64
         }
     }
 
-    output.push_str("add rsp, 4064\nmov eax,0\ncall exit");
-
+    output.push_str(PROLOG);
     fs::write("tmp.asm", &output).expect("Error writing assembly file.");
 
     //assembler
     Command::new("nasm")
-        .arg("-felf64")
-        .arg("tmp.asm")
-        .arg("-o")
-        .arg("tmp.o")
+        .args(&["-f", "elf64", "tmp.asm", "-o", "tmp.o"])
         .status()
         .expect("Error while generating ELF file.");
 
     //linker
     Command::new("ld")
-        .arg("-lc")
-        .arg("tmp.o")
-        .arg("-o")
-        .arg(&args[1].trim_end_matches(".bf"))
-        .arg("-I")
-        .arg("/lib64/ld-linux-x86-64.so.2")
+        .args(&[
+            "-lc",
+            "tmp.o",
+            "-o",
+            "hello",
+            "-I",
+            "/lib64/ld-linux-x86-64.so.2",
+        ])
         .status()
         .expect("Error while linking.");
 
     //execute
-    Command::new("./hello")
+    Command::new(&format!("./{}", &args[1].trim_end_matches(".bf")))
         .spawn()
         .expect("Could not execute generated program.");
-
-    eprintln!("{}, {}, {}", output.capacity(), cola.capacity(), count);
 }
+
+const PROLOG: &str = "add rsp, 4064\nmov eax,0\ncall exit";
+const PRELUDE: &str = r"global _start
+extern getchar
+extern putchar
+extern exit
+section .text
+_start:
+sub rsp, 4000
+mov eax, 0
+mov ecx, 4000
+mov rdi, rsp
+rep stosb
+mov r12, rsp
+sub rsp, 64
+";
