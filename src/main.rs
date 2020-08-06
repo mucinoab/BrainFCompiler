@@ -1,8 +1,9 @@
-use std::{collections::VecDeque, fs, process::Command};
+use std::{collections::VecDeque, env, fs, process::Command};
 
 fn main() {
-    let source = fs::read_to_string("./hello.bf").expect("No se pudo leer archivo");
-    let mut cola = VecDeque::with_capacity(256);
+    let args: Vec<String> = env::args().collect();
+    let source = fs::read_to_string(&args[1]).expect("Missing source file.");
+    let mut cola = VecDeque::with_capacity(1024);
     let mut output = String::with_capacity(8192);
     let mut count = 0;
 
@@ -58,7 +59,7 @@ sub rsp, 64
 
     output.push_str("add rsp, 4064\nmov eax,0\ncall exit");
 
-    fs::write("tmp.asm", &output).expect("No se pudo escribir asm.");
+    fs::write("tmp.asm", &output).expect("Error writing assembly file.");
 
     //assembler
     Command::new("nasm")
@@ -67,19 +68,23 @@ sub rsp, 64
         .arg("-o")
         .arg("tmp.o")
         .status()
-        .expect("assembler");
+        .expect("Error while generating ELF file.");
 
     //linker
     Command::new("ld")
         .arg("-lc")
         .arg("tmp.o")
         .arg("-o")
-        .arg("hello")
+        .arg(&args[1].trim_end_matches(".bf"))
         .arg("-I")
         .arg("/lib64/ld-linux-x86-64.so.2")
         .status()
-        .expect("linker");
+        .expect("Error while linking.");
 
     //execute
-    Command::new("./hello").spawn().expect("execute");
+    Command::new("./hello")
+        .spawn()
+        .expect("Could not execute generated program.");
+
+    eprintln!("{}, {}, {}", output.capacity(), cola.capacity(), count);
 }
