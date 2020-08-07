@@ -57,7 +57,7 @@ fn main() {
             "-lc",
             "tmp.o",
             "-o",
-            "hello",
+            &args[1].trim_end_matches(".bf"),
             "-I",
             "/lib64/ld-linux-x86-64.so.2",
         ])
@@ -67,21 +67,21 @@ fn main() {
     //execute
     Command::new(&format!("./{}", &args[1].trim_end_matches(".bf")))
         .spawn()
-        .expect("Could not execute generated program.");
+        .expect("While trying to run generated program.");
 }
 
-const PROLOG: &str = "add rsp, 4064\nmov eax,0\ncall exit";
+const PROLOG: &str = "add rsp, 8320\nmov eax, 0\ncall exit";
 const PRELUDE: &str = r"global _start
 extern getchar
 extern putchar
 extern exit
 section .text
 _start:
-sub rsp, 4000
+sub rsp, 8192
 mov eax, 0
-mov ecx, 4000
+mov ecx, 8192
 mov rdi, rsp
 rep stosb
 mov r12, rsp
-sub rsp, 64
+sub rsp, 128
 ";
