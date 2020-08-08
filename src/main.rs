@@ -1,16 +1,15 @@
 use std::{collections::VecDeque, env, fs, process::Command};
 
 fn main() {
-    let args: Vec<String> = env::args().collect();
+    let source_name = env::args().skip(1).next().expect("Missing source file.");
+    let source_file = fs::read_to_string(&source_name).expect("Source file not found.");
+    let mut iter = source_file.chars().peekable();
 
-    let source = fs::read_to_string(&args[1]).expect("Missing source file.");
-    let mut iter = source.chars().peekable();
-
-    let mut output_asm = String::with_capacity(8192);
     let mut cola = VecDeque::with_capacity(1024);
     let mut label_count = 0;
     let mut consecutive = 1;
 
+    let mut output_asm = String::with_capacity(8192);
     output_asm.push_str(PROLOG);
 
     while let Some(chars) = iter.next() {
@@ -90,7 +89,7 @@ fn main() {
             "-lc",
             "tmp.o",
             "-o",
-            &args[1].trim_end_matches(".bf"),
+            &source_name.trim_end_matches(".bf"),
             "-I",
             "/lib64/ld-linux-x86-64.so.2",
         ])
@@ -98,7 +97,7 @@ fn main() {
         .expect("Linking.");
 
     //execute
-    Command::new(&format!("./{}", &args[1].trim_end_matches(".bf")))
+    Command::new(&format!("./{}", &source_name.trim_end_matches(".bf")))
         .spawn()
         .expect("Running generated program.");
 }
