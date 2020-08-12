@@ -1,7 +1,7 @@
 use std::{collections::VecDeque, env, fs, process::Command};
 
 fn main() {
-    let source_name = env::args().skip(1).next().expect("Missing source file.");
+    let source_name = env::args().nth(1).expect("Missing source file.");
     let source_file = fs::read_to_string(&source_name).expect("Source file not found.");
     let mut iter = source_file.chars().peekable();
 
@@ -98,7 +98,7 @@ fn main() {
 
     //execute
     Command::new(&format!("./{}", &source_name.trim_end_matches(".bf")))
-        .spawn()
+        .status()
         .expect("Running generated program.");
 }
 
