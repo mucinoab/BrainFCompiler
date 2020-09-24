@@ -16,4 +16,4 @@ You just clone the repo and run, ```cargo run --release _sourcefile.bf_```
 
 
 #### Related
-My other brainfuck compiler. [mucinoab/BrainFCompiler](https://github.com/mucinoab/BrainFCompiler) 
+My other brainfuck compiler. [mucinoab/BrainFCompiler-LLVM](https://github.com/mucinoab/BrainFCompiler-LLVM)
