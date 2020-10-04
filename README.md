@@ -13,3 +13,7 @@ A [Brainfuck](https://en.wikipedia.org/wiki/Brainfuck) toy compiler that *very p
 ## Usage
 
 You just clone the repo and run, ```cargo run --release _sourcefile.bf_```
+
+
+#### Related
+My other brainfuck compiler. [mucinoab/BrainFCompiler-LLVM](https://github.com/mucinoab/BrainFCompiler-LLVM)
