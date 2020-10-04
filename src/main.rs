@@ -1,4 +1,4 @@
-use std::{collections::VecDeque, env, fs, process::Command};
+use std::{collections::VecDeque, env, fmt::Write, fs, process::Command};
 
 fn main() {
     let source_name = env::args().nth(1).expect("Missing source file.");
@@ -20,7 +20,7 @@ fn main() {
                     iter.next();
                 }
 
-                output_asm.push_str(&format!(" sub r12, {}\n", consecutive));
+                writeln!(&mut output_asm, " sub r12, {}", consecutive).unwrap();
             }
 
             '>' => {
@@ -29,7 +29,7 @@ fn main() {
                     iter.next();
                 }
 
-                output_asm.push_str(&format!(" add r12, {}\n", consecutive));
+                writeln!(&mut output_asm, " add r12, {}", consecutive).unwrap();
             }
 
             '+' => {
@@ -38,7 +38,7 @@ fn main() {
                     iter.next();
                 }
 
-                output_asm.push_str(&format!(" add byte [r12], {}\n", consecutive));
+                writeln!(&mut output_asm, " add byte [r12], {}", consecutive).unwrap();
             }
 
             '-' => {
@@ -47,30 +47,35 @@ fn main() {
                     iter.next();
                 }
 
-                output_asm.push_str(&format!(" sub byte [r12], {}\n", consecutive));
+                writeln!(&mut output_asm, " sub byte [r12], {}", consecutive).unwrap();
             }
 
-            ',' => output_asm.push_str(" call getchar;\n mov [r12], al\n"),
+            ',' => writeln!(&mut output_asm, " call getchar;\n mov [r12], al").unwrap(),
 
-            '.' => output_asm.push_str(" mov dil, [r12];\n call putchar\n"),
+            '.' => writeln!(&mut output_asm, " mov dil, [r12];\n call putchar").unwrap(),
 
             '[' => {
-                output_asm.push_str(&format!(
-                    "label{0}start:\n cmp byte [r12], 0\n jz label{0}end\n",
+                writeln!(
+                    &mut output_asm,
+                    "label{0}start:\n cmp byte [r12], 0\n jz label{0}end",
                     label_count
-                ));
+                )
+                .unwrap();
 
                 cola.push_back(label_count);
                 label_count += 1;
             }
 
-            ']' => output_asm.push_str(&format!(
-                " jmp label{0}start\nlabel{0}end:\n",
+            ']' => writeln!(
+                &mut output_asm,
+                " jmp label{0}start\nlabel{0}end:",
                 cola.pop_front().expect("No matching loop")
-            )),
+            )
+            .unwrap(),
 
             _ => {}
         }
+
         consecutive = 1;
     }
 
