@@ -1,5 +1,5 @@
 # BrainFCompiler
-A [Brainfuck](https://en.wikipedia.org/wiki/Brainfuck) toy compiler that *very poorly* generates, assembles and links x64 instructions.
+A [Brainfuck](https://en.wikipedia.org/wiki/Brainfuck) toy compiler that *very poorly* generates, assembles and links x86 instructions.
 
 
 ## Requirements
